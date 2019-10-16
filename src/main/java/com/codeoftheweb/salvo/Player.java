@@ -2,10 +2,10 @@ package com.codeoftheweb.salvo;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 public class Player {
@@ -34,5 +34,18 @@ public class Player {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    // relaciones
+    @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
+    Set<GamePlayer> gamePlayer;
+
+    public Map<String, Object> makePlayerDTO(){
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+
+        dto.put("id", this.getId());
+        dto.put("email", this.getUserName());
+
+        return dto;
     }
 }
