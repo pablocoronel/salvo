@@ -1,12 +1,13 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.models;
 
+import com.codeoftheweb.salvo.models.Game;
+import com.codeoftheweb.salvo.models.Player;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Entity
 public class GamePlayer {
@@ -18,9 +19,10 @@ public class GamePlayer {
     private Date joinDate;
 
     // constructor
-    public GamePlayer(){}
+    public GamePlayer() {
+    }
 
-    public GamePlayer(Game game, Player player, Date fecha){
+    public GamePlayer(Game game, Player player, Date fecha) {
         this.game = game;
         this.player = player;
         this.joinDate = fecha;
@@ -41,11 +43,11 @@ public class GamePlayer {
 
     // relaciones
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="player_id")
+    @JoinColumn(name = "player_id")
     private Player player;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="game_id")
+    @JoinColumn(name = "game_id")
     private Game game;
 
     // metodos particulares

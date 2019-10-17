@@ -1,5 +1,11 @@
 package com.codeoftheweb.salvo;
 
+import com.codeoftheweb.salvo.models.Game;
+import com.codeoftheweb.salvo.models.GamePlayer;
+import com.codeoftheweb.salvo.models.Player;
+import com.codeoftheweb.salvo.repositories.GamePlayerRepository;
+import com.codeoftheweb.salvo.repositories.GameRepository;
+import com.codeoftheweb.salvo.repositories.PlayerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,11 +37,11 @@ public class SalvoApplication {
             // juegos
             Date date = new Date();
             Date fecha_ahora = new Date();
-			Date one_hour_later = Date.from(date.toInstant().plusSeconds(3600));
-			Date two_hour_later = Date.from(date.toInstant().plusSeconds(3600 *2));
-			Date three_hour_later = Date.from(date.toInstant().plusSeconds(3600 *3));
-			Date four_hour_later = Date.from(date.toInstant().plusSeconds(3600 *4));
-			Date five_hour_later = Date.from(date.toInstant().plusSeconds(3600 *5));
+            Date one_hour_later = Date.from(date.toInstant().plusSeconds(3600));
+            Date two_hour_later = Date.from(date.toInstant().plusSeconds(3600 * 2));
+            Date three_hour_later = Date.from(date.toInstant().plusSeconds(3600 * 3));
+            Date four_hour_later = Date.from(date.toInstant().plusSeconds(3600 * 4));
+            Date five_hour_later = Date.from(date.toInstant().plusSeconds(3600 * 5));
 
             Game juego_1 = new Game();
             Game juego_2 = new Game();

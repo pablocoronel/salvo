@@ -1,4 +1,4 @@
-package com.codeoftheweb.salvo;
+package com.codeoftheweb.salvo.models;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -19,12 +19,12 @@ public class Game {
     private Date creationDate;
 
     // constructor
-    public Game(){
+    public Game() {
         this.creationDate = new Date();
     }
 
     // constructor con seteo de fecha
-    public Game(Date date){
+    public Game(Date date) {
         this.creationDate = date;
     }
 
@@ -46,7 +46,7 @@ public class Game {
     }
 
     // relaciones
-    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy = "game", fetch = FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
     // metodos particulares
