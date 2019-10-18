@@ -50,10 +50,10 @@ public class Game {
     Set<GamePlayer> gamePlayers;
 
     // metodos particulares
-    public Map<String, Object> makeGameDTO(Game juego) {
+    public Map<String, Object> makeGameDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
-        dto.put("id", juego.getId());
-        dto.put("created", juego.getCreationDate());
+        dto.put("id", this.getId());
+        dto.put("created", this.getCreationDate());
         dto.put("gamePlayers", this.getGamePlayers().stream().map(gamePlayer -> gamePlayer.makeGamePlayerDTO()).collect(Collectors.toList()));
         return dto;
     }
