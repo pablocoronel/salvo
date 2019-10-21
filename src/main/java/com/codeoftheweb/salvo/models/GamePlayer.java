@@ -18,17 +18,12 @@ public class GamePlayer {
 
     // constructor
     public GamePlayer() {
-        HashSet<Ship> ships_add = new HashSet<Ship>();
-        this.ships = ships_add;
     }
 
     public GamePlayer(Game game, Player player, Date fecha) {
         this.game = game;
         this.player = player;
         this.joinDate = fecha;
-
-        HashSet<Ship> ships_add = new HashSet<Ship>();
-        this.ships = ships_add;
     }
 
     // getters y setters
@@ -60,10 +55,6 @@ public class GamePlayer {
         return ships;
     }
 
-    public void setShips(Set<Ship> ships) {
-        this.ships = ships;
-    }
-
     // relaciones
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "player_id")
@@ -74,7 +65,7 @@ public class GamePlayer {
     private Game game;
 
     @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
-    private Set<Ship> ships;
+    private Set<Ship> ships  = new HashSet<Ship>();
 
 
     // metodos particulares
@@ -87,6 +78,7 @@ public class GamePlayer {
 
     // agrega barcos al gamePlayer
     public void addShip(Ship ship) {
+        ship.setGamePlayer(this);
         this.ships.add(ship);
     }
 }
