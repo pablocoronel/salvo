@@ -317,8 +317,14 @@ public class SalvoApplication {
             Score score_1 = new Score(j_bauer, juego_1, one_hour_later, 1);
             scoreRepository.save(score_1);
 
-            Score score_2 = new Score(obrian, juego_1, one_hour_later, 0.5);
+            Score score_2 = new Score(obrian, juego_1, one_hour_later, 0);
             scoreRepository.save(score_2);
+
+            Score score_3 = new Score(j_bauer, juego_2, one_hour_later, 0.5);
+            scoreRepository.save(score_3);
+
+            Score score_4 = new Score(obrian, juego_2, one_hour_later, 0.5);
+            scoreRepository.save(score_4);
         };
     }
 
