@@ -26,15 +26,14 @@ public class SalvoController {
 
     // lista de partidas
     @RequestMapping("/games")
-    public List<Map<String, Object>> getGames() {
-        // listado de ID's
-        List<Game> lista_juegos = gameRepository.findAll();
-        List<Long> lista_id = lista_juegos.stream()
-                .map(game -> game.getId())
-                .collect(Collectors.toList());
+    public Map<String, Object> getGames() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        List<Game> game = gameRepository.findAll();
 
-        // listado de maps (id's)
-        return gameRepository.findAll().stream().map(game -> game.makeGameDTO()).collect(Collectors.toList());
+        data.put("player", "Guest");
+        data.put("games", game.stream().map(game1 -> game1.makeGameDTO()));
+
+        return data;
     }
 
     // partida de cada jugador
