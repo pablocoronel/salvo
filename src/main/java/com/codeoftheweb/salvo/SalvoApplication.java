@@ -1,13 +1,7 @@
 package com.codeoftheweb.salvo;
 
-import com.codeoftheweb.salvo.models.Game;
-import com.codeoftheweb.salvo.models.GamePlayer;
-import com.codeoftheweb.salvo.models.Player;
-import com.codeoftheweb.salvo.models.Ship;
-import com.codeoftheweb.salvo.repositories.GamePlayerRepository;
-import com.codeoftheweb.salvo.repositories.GameRepository;
-import com.codeoftheweb.salvo.repositories.PlayerRepository;
-import com.codeoftheweb.salvo.repositories.ShipRepository;
+import com.codeoftheweb.salvo.models.*;
+import com.codeoftheweb.salvo.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +21,8 @@ public class SalvoApplication {
 
     @Bean
     public CommandLineRunner initData(PlayerRepository playerRepository, GameRepository gameRepository,
-                                      GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository) {
+                                      GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository,
+                                      SalvoRepository salvoRepository) {
         return (args) -> {
             // jugadores
             Player j_bauer = new Player("j.bauer@ctu.gov");
@@ -231,6 +226,92 @@ public class SalvoApplication {
             Ship barco_27 = new Ship("Patrol Boat", ubicacion_27);
             gamePlayer_13.addShip(barco_27);
             shipRepository.save(barco_27);
+
+            // salvos
+            List<String> salvo_ubicacion_1 = Arrays.asList("B5", "C5", "F1");
+            Salvo salvo_1 = new Salvo(1, gamePlayer_1, salvo_ubicacion_1);
+            salvoRepository.save(salvo_1);
+
+            List<String> salvo_ubicacion_2 = Arrays.asList("B4", "B5", "B6");
+            Salvo salvo_2 = new Salvo(1, gamePlayer_2, salvo_ubicacion_2);
+            salvoRepository.save(salvo_2);
+
+            List<String> salvo_ubicacion_3 = Arrays.asList("F2", "D5");
+            Salvo salvo_3 = new Salvo(2, gamePlayer_1, salvo_ubicacion_3);
+            salvoRepository.save(salvo_3);
+
+            List<String> salvo_ubicacion_4 = Arrays.asList("E1", "H3", "A2");
+            Salvo salvo_4 = new Salvo(2, gamePlayer_2, salvo_ubicacion_4);
+            salvoRepository.save(salvo_4);
+
+            List<String> salvo_ubicacion_5 = Arrays.asList("A2", "A4", "G6");
+            Salvo salvo_5 = new Salvo(1, gamePlayer_3, salvo_ubicacion_5);
+            salvoRepository.save(salvo_5);
+
+            List<String> salvo_ubicacion_6 = Arrays.asList("B5", "D5", "C7");
+            Salvo salvo_6 = new Salvo(1, gamePlayer_4, salvo_ubicacion_6);
+            salvoRepository.save(salvo_6);
+
+            List<String> salvo_ubicacion_7 = Arrays.asList("A3", "H6");
+            Salvo salvo_7 = new Salvo(2, gamePlayer_3, salvo_ubicacion_7);
+            salvoRepository.save(salvo_7);
+
+            List<String> salvo_ubicacion_8 = Arrays.asList("C5", "C6");
+            Salvo salvo_8 = new Salvo(2, gamePlayer_4, salvo_ubicacion_8);
+            salvoRepository.save(salvo_8);
+            // row #
+
+            List<String> salvo_ubicacion_9 = Arrays.asList("G6", "H6", "A4");
+            Salvo salvo_9 = new Salvo(1, gamePlayer_5, salvo_ubicacion_9);
+            salvoRepository.save(salvo_9);
+
+            List<String> salvo_ubicacion_10 = Arrays.asList("H1", "H2", "H3");
+            Salvo salvo_10 = new Salvo(1, gamePlayer_6, salvo_ubicacion_10);
+            salvoRepository.save(salvo_10);
+
+            List<String> salvo_ubicacion_11 = Arrays.asList("A2", "A3", "D8");
+            Salvo salvo_11 = new Salvo(2, gamePlayer_5, salvo_ubicacion_11);
+            salvoRepository.save(salvo_11);
+
+            List<String> salvo_ubicacion_12 = Arrays.asList("E1", "F2", "G3");
+            Salvo salvo_12 = new Salvo(2, gamePlayer_6, salvo_ubicacion_12);
+            salvoRepository.save(salvo_12);
+
+            List<String> salvo_ubicacion_13 = Arrays.asList("A3", "A4", "F7");
+            Salvo salvo_13 = new Salvo(1, gamePlayer_7, salvo_ubicacion_13);
+            salvoRepository.save(salvo_13);
+
+            List<String> salvo_ubicacion_14 = Arrays.asList("B5", "C6", "H1");
+            Salvo salvo_14 = new Salvo(1, gamePlayer_8, salvo_ubicacion_14);
+            salvoRepository.save(salvo_14);
+
+            List<String> salvo_ubicacion_15 = Arrays.asList("A2", "G6", "H6");
+            Salvo salvo_15 = new Salvo(2, gamePlayer_7, salvo_ubicacion_15);
+            salvoRepository.save(salvo_15);
+
+            List<String> salvo_ubicacion_16 = Arrays.asList("C5", "C7", "D5");
+            Salvo salvo_16 = new Salvo(2, gamePlayer_8, salvo_ubicacion_16);
+            salvoRepository.save(salvo_16);
+
+            List<String> salvo_ubicacion_17 = Arrays.asList("A1", "A2", "A3");
+            Salvo salvo_17 = new Salvo(1, gamePlayer_9, salvo_ubicacion_17);
+            salvoRepository.save(salvo_17);
+
+            List<String> salvo_ubicacion_18 = Arrays.asList("B5", "B6", "C7");
+            Salvo salvo_18 = new Salvo(1, gamePlayer_10, salvo_ubicacion_18);
+            salvoRepository.save(salvo_18);
+
+            List<String> salvo_ubicacion_19 = Arrays.asList("G6", "G7", "G8");
+            Salvo salvo_19 = new Salvo(2, gamePlayer_9, salvo_ubicacion_19);
+            salvoRepository.save(salvo_19);
+
+            List<String> salvo_ubicacion_20 = Arrays.asList("C6", "D6", "E6");
+            Salvo salvo_20 = new Salvo(2, gamePlayer_10, salvo_ubicacion_20);
+            salvoRepository.save(salvo_20);
+
+            List<String> salvo_ubicacion_21 = Arrays.asList("H1", "H8");
+            Salvo salvo_21 = new Salvo(3, gamePlayer_10, salvo_ubicacion_21);
+            salvoRepository.save(salvo_21);
 
         };
     }

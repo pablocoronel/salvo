@@ -50,6 +50,9 @@ public class SalvoController {
         data.put("gamePlayers", game.getGamePlayers().stream().map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
         data.put("ships", game_player.getShips().stream().map(ship -> ship.makeShipDTO()));
 
+        data.put("salvoes", game.getGamePlayers().stream().map(gamePlayer -> gamePlayer.getSalvoes())
+                                                    .flatMap(salvos -> salvos.stream()).map(s -> s.makeSalvoDTO()));
+
         return data;
     }
 }

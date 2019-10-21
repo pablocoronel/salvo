@@ -16,6 +16,21 @@ public class GamePlayer {
 
     private Date joinDate;
 
+    // relaciones
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "player_id")
+    private Player player;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
+    private Set<Ship> ships = new HashSet<Ship>();
+
+    @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
+    private Set<Salvo> salvoes = new HashSet<Salvo>();
+
     // constructor
     public GamePlayer() {
     }
@@ -55,18 +70,9 @@ public class GamePlayer {
         return ships;
     }
 
-    // relaciones
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "player_id")
-    private Player player;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "game_id")
-    private Game game;
-
-    @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
-    private Set<Ship> ships  = new HashSet<Ship>();
-
+    public Set<Salvo> getSalvoes() {
+        return salvoes;
+    }
 
     // metodos particulares
     public Map<String, Object> makeGamePlayerDTO() {
