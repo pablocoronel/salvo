@@ -16,6 +16,15 @@ public class Player {
     private long id;
     private String userName;
 
+    private String password;
+
+    // relaciones
+    @OneToMany(mappedBy = "player", fetch = FetchType.EAGER)
+    Set<GamePlayer> gamePlayer;
+
+    @OneToMany(mappedBy = "player", fetch = FetchType.EAGER)
+    Set<Score> scores;
+
     // constructor por defecto
     public Player() {
     }
@@ -46,12 +55,13 @@ public class Player {
         this.scores = scores;
     }
 
-    // relaciones
-    @OneToMany(mappedBy = "player", fetch = FetchType.EAGER)
-    Set<GamePlayer> gamePlayer;
+    public String getPassword() {
+        return password;
+    }
 
-    @OneToMany(mappedBy = "player", fetch = FetchType.EAGER)
-    Set<Score> scores;
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Map<String, Object> makePlayerDTO() {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
