@@ -22,8 +22,8 @@ public class Salvo {
     private GamePlayer gamePlayer;
 
     @ElementCollection
-    @Column(name = "salvo_locations")
-    private List<String> salvoLocations;
+    @Column(name = "location")
+    private List<String> locations;
 
     public long getTurn() {
         return turn;
@@ -41,21 +41,21 @@ public class Salvo {
         this.gamePlayer = gamePlayer;
     }
 
-    public List<String> getSalvoLocations() {
-        return salvoLocations;
+    public List<String> getLocations() {
+        return locations;
     }
 
-    public void setSalvoLocations(List<String> salvoLocations) {
-        this.salvoLocations = salvoLocations;
+    public void setLocations(List<String> locations) {
+        this.locations = locations;
     }
 
     // constructores
     public Salvo(){}
 
-    public Salvo(long turn, GamePlayer gamePlayer, List<String> salvoLocations) {
+    public Salvo(long turn, GamePlayer gamePlayer, List<String> locations) {
         this.turn = turn;
         this.gamePlayer = gamePlayer;
-        this.salvoLocations = salvoLocations;
+        this.locations = locations;
     }
 
     // metodos
@@ -64,7 +64,7 @@ public class Salvo {
 
         dto.put("turn", this.getTurn());
         dto.put("player", this.getGamePlayer().getPlayer().getId());
-        dto.put("locations", this.getSalvoLocations());
+        dto.put("locations", this.getLocations());
 
         return  dto;
     }

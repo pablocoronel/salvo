@@ -20,9 +20,9 @@ public class Ship {
     public Ship() {
     }
 
-    public Ship(String type, List<String> shipLocations) {
+    public Ship(String type, List<String> locations) {
         this.type = type;
-        this.shipLocations = shipLocations;
+        this.locations = locations;
     }
 
     // relaciones
@@ -31,8 +31,8 @@ public class Ship {
     private GamePlayer gamePlayer;
 
     @ElementCollection
-    @Column(name = "ship_locations")
-    private List<String> shipLocations;
+    @Column(name = "location")
+    private List<String> locations;
 
     // getters y setters
     public long getId() {
@@ -55,12 +55,12 @@ public class Ship {
         this.gamePlayer = gamePlayer;
     }
 
-    public List<String> getShipLocations() {
-        return shipLocations;
+    public List<String> getLocations() {
+        return locations;
     }
 
-    public void setShipLocations(List<String> shipLocations) {
-        this.shipLocations = shipLocations;
+    public void setLocations(List<String> locations) {
+        this.locations = locations;
     }
 
     // metodos particulares
@@ -68,7 +68,7 @@ public class Ship {
         Map<String, Object> dto = new LinkedHashMap<>();
 
         dto.put("type", this.getType());
-        dto.put("locations", this.getShipLocations());
+        dto.put("locations", this.getLocations());
 
         return dto;
     }
