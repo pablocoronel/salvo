@@ -37,7 +37,12 @@ public class SalvoController {
     // partida de cada jugador
     @RequestMapping("game_view/{gp}")
     public ResponseEntity<Map<String, Object>> getGames(@PathVariable Long gp, Authentication authentication) {
-        GamePlayer game_player = gamePlayerRepository.findById(gp).get();
+        GamePlayer game_player = gamePlayerRepository.findById(gp).orElse(null);
+
+        if (game_player == null){
+            return this.createEntityResponse("error", "no encontrado", HttpStatus.UNAUTHORIZED);
+        }
+
         Game game = game_player.getGame();
         Player current_user = playerRepository.findByUserName(authentication.getName());
 

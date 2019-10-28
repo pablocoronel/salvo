@@ -1,13 +1,7 @@
 package com.codeoftheweb.salvo.controllers;
 
-import com.codeoftheweb.salvo.models.Game;
-import com.codeoftheweb.salvo.models.GamePlayer;
-import com.codeoftheweb.salvo.models.Player;
-import com.codeoftheweb.salvo.models.Ship;
-import com.codeoftheweb.salvo.repositories.GamePlayerRepository;
-import com.codeoftheweb.salvo.repositories.GameRepository;
-import com.codeoftheweb.salvo.repositories.PlayerRepository;
-import com.codeoftheweb.salvo.repositories.ShipRepository;
+import com.codeoftheweb.salvo.models.*;
+import com.codeoftheweb.salvo.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping("/api")
@@ -33,6 +28,9 @@ public class GameController {
 
     @Autowired
     private ShipRepository shipRepository;
+
+    @Autowired
+    private SalvoRepository salvoRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -94,7 +92,7 @@ public class GameController {
         }
 
         // juego con un solo jugador
-        Game juego = gameRepository.findById(game_id).get();
+        Game juego = gameRepository.findById(game_id).orElse(null);
         if (juego == null) {
             return this.createEntityResponse("error", "No existe el juego", HttpStatus.FORBIDDEN);
         }
@@ -121,7 +119,7 @@ public class GameController {
     public ResponseEntity<Map<String, Object>> placeShip(@PathVariable Long gamePlayerId, @RequestBody List<Ship> ships,
                                                          Authentication authentication) {
         // no está logueado
-        if(this.isGuest(authentication)){
+        if (this.isGuest(authentication)) {
             return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
         }
 
@@ -129,27 +127,65 @@ public class GameController {
         Player current_player = playerRepository.findByUserName(authentication.getName());
 
         // no existe el gamePlayer id
-        GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).get();//.orElse(null);
-        if(gamePlayer == null){
+        GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
+        if (gamePlayer == null) {
             return this.createEntityResponse("error", "no existe la partida", HttpStatus.UNAUTHORIZED);
         }
 
         // el usuario logueado no es del juego
-        if(gamePlayer.getPlayer().getId() != current_player.getId()){
+        if (gamePlayer.getPlayer().getId() != current_player.getId()) {
             return this.createEntityResponse("error", "su usuario no tiene permiso", HttpStatus.UNAUTHORIZED);
         }
 
         // el player ya tiene ships
-        if(gamePlayer.getShips().size() > 0){
+        if (gamePlayer.getShips().size() > 0) {
             return this.createEntityResponse("error", "su usuario ya tiene barcos", HttpStatus.FORBIDDEN);
         }
 
         /**
          * guardar los ships y sus ubicaciones
          */
-        ships.forEach(ship->ship.setGamePlayer(gamePlayer));
+        ships.forEach(ship -> ship.setGamePlayer(gamePlayer));
         ships.forEach(shipR -> shipRepository.save(shipR));
-        return  createEntityResponse("OK", "ubicaciones guardadas", HttpStatus.CREATED);
+        return createEntityResponse("OK", "ubicaciones guardadas", HttpStatus.CREATED);
+    }
+
+
+    // guardar salvos
+    @RequestMapping(value = "/games/players/{gamePlayerId}/salvoes", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> storeSalvoes(@PathVariable Long gamePlayerId, @RequestBody Salvo salvoes, Authentication authentication) {
+        // no está logueado
+        if (this.isGuest(authentication)) {
+            return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
+        }
+
+        // player logueado
+        Player current_player = playerRepository.findByUserName(authentication.getName());
+
+        // no existe el gamePlayer id
+        GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
+        if (gamePlayer == null) {
+            return this.createEntityResponse("error", "no existe la partida", HttpStatus.UNAUTHORIZED);
+        }
+
+        // el usuario logueado no es del juego
+        if (gamePlayer.getPlayer().getId() != current_player.getId()) {
+            return this.createEntityResponse("error", "su usuario no tiene permiso", HttpStatus.UNAUTHORIZED);
+        }
+
+        Long existe_turno = gamePlayer.getSalvoes().stream()
+                .filter(salvo -> salvo.getTurn() == salvoes.getTurn()).count();
+
+        if (existe_turno > 0) {
+            return this.createEntityResponse("error", "ya se envio el turno", HttpStatus.FORBIDDEN);
+        }
+
+        /**
+         * guardar salvo
+         */
+        salvoes.setGamePlayer(gamePlayer);
+        salvoRepository.save(salvoes);
+        return this.createEntityResponse("OK", "guardado", HttpStatus.OK);
     }
 
     // saber si un usuario está logueado
