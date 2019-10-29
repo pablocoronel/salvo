@@ -153,7 +153,7 @@ public class GameController {
 
     // guardar salvos
     @RequestMapping(value = "/games/players/{gamePlayerId}/salvoes", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> storeSalvoes(@PathVariable Long gamePlayerId, @RequestBody Salvo salvoes, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> storeSalvoes(@PathVariable Long gamePlayerId, @RequestBody Salvo salvo, Authentication authentication) {
         // no está logueado
         if (this.isGuest(authentication)) {
             return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
@@ -174,7 +174,7 @@ public class GameController {
         }
 
         Long existe_turno = gamePlayer.getSalvoes().stream()
-                .filter(salvo -> salvo.getTurn() == salvoes.getTurn()).count();
+                .filter(cada_salvo -> cada_salvo.getTurn() == salvo.getTurn()).count();
 
         if (existe_turno > 0) {
             return this.createEntityResponse("error", "ya se envio el turno", HttpStatus.FORBIDDEN);
@@ -183,8 +183,8 @@ public class GameController {
         /**
          * guardar salvo
          */
-        salvoes.setGamePlayer(gamePlayer);
-        salvoRepository.save(salvoes);
+        salvo.setGamePlayer(gamePlayer);
+        salvoRepository.save(salvo);
         return this.createEntityResponse("OK", "guardado", HttpStatus.OK);
     }
 

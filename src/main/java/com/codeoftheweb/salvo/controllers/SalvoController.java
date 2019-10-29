@@ -39,7 +39,7 @@ public class SalvoController {
     public ResponseEntity<Map<String, Object>> getGames(@PathVariable Long gp, Authentication authentication) {
         GamePlayer game_player = gamePlayerRepository.findById(gp).orElse(null);
 
-        if (game_player == null){
+        if (game_player == null) {
             return this.createEntityResponse("error", "no encontrado", HttpStatus.UNAUTHORIZED);
         }
 
@@ -51,6 +51,23 @@ public class SalvoController {
             return this.createEntityResponse("error", "no autorizado", HttpStatus.UNAUTHORIZED);
         }
 
+        // gameplayers de self y oponente
+        /**
+         * game player self
+         */
+        GamePlayer game_player_self = game_player;
+
+        long id_juego = game.getId();
+        Game game_opponent = game;
+        game_opponent.getGamePlayers().removeIf(gamePlayer -> gamePlayer.getId() == game_player_self.getId());
+
+        /**
+         * game player opponent
+         */
+        GamePlayer game_player_opponent = game_opponent.getGamePlayers().stream().findFirst().orElse(null);
+
+
+        // data
         Map<String, Object> data = new LinkedHashMap<String, Object>();
 
         data.put("id", game.getId());
@@ -58,16 +75,9 @@ public class SalvoController {
         data.put("gameState", "PLACESHIPS");
         data.put("gamePlayers", game.getGamePlayers().stream().map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
         data.put("ships", game_player.getShips().stream().map(ship -> ship.makeShipDTO()));
-
         data.put("salvoes", game.getGamePlayers().stream().map(gamePlayer -> gamePlayer.getSalvoes())
                 .flatMap(salvos -> salvos.stream()).map(s -> s.makeSalvoDTO()));
-
-        // hits hardcodeados
-        Map<String, Object> mapa_hits = new HashMap<String, Object>();
-        List<String> lista_vacia = new ArrayList<String>();
-        mapa_hits.put("self", lista_vacia);
-        mapa_hits.put("opponent", lista_vacia);
-        data.put("hits", mapa_hits);
+        data.put("hits", game.makeHitsDTO(game_player_self, game_player_opponent));
 
         return this.createEntityResponse(data, HttpStatus.OK);
     }
