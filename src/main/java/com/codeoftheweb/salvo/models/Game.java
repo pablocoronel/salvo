@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 public class Game {
@@ -68,10 +69,6 @@ public class Game {
         return dto;
     }
 
-    public enum barcos {
-        carrier, battleship, Submarine, destroyer, petrolboat
-    }
-
     // hits
     public Map<String, Object> makeHitsDTO(GamePlayer self, GamePlayer opponent) {
         Map<String, Object> data = new HashMap<String, Object>();
@@ -79,6 +76,20 @@ public class Game {
         List<Map<String, Object>> lista_opponent = new ArrayList<Map<String, Object>>();
 
         List<Long> turnos_self = self.getSalvoes().stream().map(salvo -> salvo.getTurn()).collect(Collectors.toList());
+        turnos_self.sort((o1, o2) -> {
+            int res = 0;
+            if (o1 < o2) {
+                res = -1;
+            }
+            if (o1 == o2) {
+                res = 0;
+            }
+            if (o1 > o2) {
+                res = 1;
+            }
+
+            return res;
+        });
 
         // mis ships
         Map<String, Object> self_ubicaciones = new HashMap<String, Object>();
@@ -92,17 +103,27 @@ public class Game {
         Map<Long, Object> intentos_opponent = new HashMap<Long, Object>();
         opponent.getSalvoes().forEach(salvo -> intentos_opponent.put(salvo.getTurn(), salvo.getLocations()));
 
-        // hits a mi
-
 
 /*************************************************/
 
+        Map<String, Object> mapa_damages_total = new HashMap<String, Object>();
+        mapa_damages_total.put("carrier", 0);
+        mapa_damages_total.put("battleship", 0);
+        mapa_damages_total.put("submarine", 0);
+        mapa_damages_total.put("destroyer", 0);
+        mapa_damages_total.put("patrolboat", 0);
 
         turnos_self.forEach(turno -> {
+            Map<String, Object> mapa_damages = new HashMap<String, Object>();
+            mapa_damages.put("carrierHits", 0);
+            mapa_damages.put("battleshipHits", 0);
+            mapa_damages.put("submarineHits", 0);
+            mapa_damages.put("destroyerHits", 0);
+            mapa_damages.put("patrolboatHits", 0);
+
+
             Map<String, Object> mapa_turno = new HashMap<String, Object>();
             List<String> hitsLocations = new ArrayList<String>();
-
-            Map<String, Object> mapa_damages = new HashMap<String, Object>();
 
 
             mapa_turno.put("turn", turno);
@@ -112,37 +133,48 @@ public class Game {
                 barcos_nombre.forEach(b -> {
                     List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
 
-                    String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
-                    mapa_damages.put(nombre_key_damage_turno, 0);
 
                     cada_barco.forEach(s -> {
                         // hitLocationes
                         if (s == un_intento) {
                             hitsLocations.add(s);
+
+                            /**
+                             * guarda por turno
+                             */
+                            String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
+                            Integer val = (Integer) mapa_damages.get(nombre_key_damage_turno);
+
+                            mapa_damages.put(nombre_key_damage_turno, val + 1);
+
+                            /**
+                             * guarda el total
+                             */
+                            String nombre_key_damage_total = b.toLowerCase().replaceAll(" ", "");
+                            Integer val_total = (Integer) mapa_damages_total.get(nombre_key_damage_total);
+
+                            mapa_damages_total.put(nombre_key_damage_total, val_total + 1);
                         }
                     });
-
-                    // damages
                 });
-
             });
 
-//            Set<String> barcos_nombre_damage = mapa_damages.keySet();
 
             mapa_turno.put("hitLocations", hitsLocations);
+
+            //combinar mapas de hits
+            mapa_damages.putAll(mapa_damages_total);
             mapa_turno.put("damages", mapa_damages);
+
+            mapa_turno.put("missed", 5 - hitsLocations.size());
+
             lista_self.add(mapa_turno);
         });
-
-
-        System.out.println(lista_self);
 
 
         // final
         data.put("self", lista_self);
 //        data.put("opponent", lista_opponent);
-
-
         return data;
     }
 
