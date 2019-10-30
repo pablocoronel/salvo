@@ -138,7 +138,7 @@ public class GameController {
         }
 
         // el player ya tiene ships
-        if (gamePlayer.getShips().size() > 0) {
+        if (gamePlayer.getShips().isEmpty()) {
             return this.createEntityResponse("error", "su usuario ya tiene barcos", HttpStatus.FORBIDDEN);
         }
 
@@ -173,6 +173,15 @@ public class GameController {
             return this.createEntityResponse("error", "su usuario no tiene permiso", HttpStatus.UNAUTHORIZED);
         }
 
+        // setear turno
+        if (gamePlayer.getSalvoes().isEmpty()) {
+            salvo.setTurn(1);
+        } else {
+            salvo.setTurn(gamePlayer.getSalvoes().size() + 1);
+        }
+
+
+        // no repetir turno
         Long existe_turno = gamePlayer.getSalvoes().stream()
                 .filter(cada_salvo -> cada_salvo.getTurn() == salvo.getTurn()).count();
 

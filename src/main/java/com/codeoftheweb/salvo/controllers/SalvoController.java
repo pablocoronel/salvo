@@ -66,7 +66,6 @@ public class SalvoController {
          */
         GamePlayer game_player_opponent = game_opponent.getGamePlayers().stream().findFirst().orElse(null);
 
-
         // data
         Map<String, Object> data = new LinkedHashMap<String, Object>();
 
