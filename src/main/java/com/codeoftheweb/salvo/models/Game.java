@@ -75,7 +75,6 @@ public class Game {
     // hits
     public Map<String, Object> makeHitsDTO(GamePlayer self, GamePlayer opponent) {
         Map<String, Object> data = new HashMap<String, Object>();
-
         List<Map<String, Object>> lista_self = new ArrayList<Map<String, Object>>();
         List<Map<String, Object>> lista_opponent = new ArrayList<Map<String, Object>>();
 
@@ -83,50 +82,64 @@ public class Game {
 
         // mis ships
         Map<String, Object> self_ubicaciones = new HashMap<String, Object>();
-        self.getShips().forEach(ship -> self_ubicaciones.put(ship.getType(), ship.getLocations()));
+        self.getShips().forEach(ship -> {
+            self_ubicaciones.put(ship.getType(), ship.getLocations());
+        });
+
+        Set<String> barcos_nombre = self_ubicaciones.keySet();
 
         //intentos del oponente
         Map<Long, Object> intentos_opponent = new HashMap<Long, Object>();
         opponent.getSalvoes().forEach(salvo -> intentos_opponent.put(salvo.getTurn(), salvo.getLocations()));
 
         // hits a mi
-        Map<Long, Object> mapa_hits = new HashMap<Long, Object>();
-        List<String> hitsLocations = new ArrayList<String>();
-        Iterator<Object> it_ubicaciones = self_ubicaciones.values().iterator();
-        List<String> hits_turno = new ArrayList<String>();
-
-        Map<Long, Object> sub_mapa = new HashMap<Long, Object>();
 
 
+/*************************************************/
 
 
-        while (it_ubicaciones.hasNext()) {
-            List<String> cada_barco = (List<String>) it_ubicaciones.next();
+        turnos_self.forEach(turno -> {
+            Map<String, Object> mapa_turno = new HashMap<String, Object>();
+            List<String> hitsLocations = new ArrayList<String>();
 
-            turnos_self.forEach(turno -> {
+            Map<String, Object> mapa_damages = new HashMap<String, Object>();
 
-                List<String> intento = (List<String>) intentos_opponent.get(turno);
 
-                intento.forEach(un_intento -> {
+            mapa_turno.put("turn", turno);
+            List<String> intento = (List<String>) intentos_opponent.get(turno);
+
+            intento.forEach(un_intento -> {
+                barcos_nombre.forEach(b -> {
+                    List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
+
+                    String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
+                    mapa_damages.put(nombre_key_damage_turno, 0);
+
                     cada_barco.forEach(s -> {
+                        // hitLocationes
                         if (s == un_intento) {
-//                            hits_turno.add(s);
-                            //cambiar la Key del sub_mapa, por el type de ship
-                            sub_mapa.put(turno, s);
+                            hitsLocations.add(s);
                         }
                     });
+
+                    // damages
                 });
 
-//                mapa_hits.put(turno, hits_turno);
-                mapa_hits.put(turno, sub_mapa);
             });
-        }
+
+//            Set<String> barcos_nombre_damage = mapa_damages.keySet();
+
+            mapa_turno.put("hitLocations", hitsLocations);
+            mapa_turno.put("damages", mapa_damages);
+            lista_self.add(mapa_turno);
+        });
 
 
-        System.out.println(mapa_hits);
+        System.out.println(lista_self);
+
+
         // final
-//        lista_self.addAll();
-//        data.put("self", lista_self);
+        data.put("self", lista_self);
 //        data.put("opponent", lista_opponent);
 
 
