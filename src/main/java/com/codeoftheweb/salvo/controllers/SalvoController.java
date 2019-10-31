@@ -58,13 +58,13 @@ public class SalvoController {
         GamePlayer game_player_self = game_player;
 
         long id_juego = game.getId();
-        Game game_opponent = game;
-        game_opponent.getGamePlayers().removeIf(gamePlayer -> gamePlayer.getId() == game_player_self.getId());
 
         /**
          * game player opponent
          */
-        GamePlayer game_player_opponent = game_opponent.getGamePlayers().stream().findFirst().orElse(null);
+        GamePlayer game_player_opponent = game.getGamePlayers().stream()
+                .filter(gamePlayer -> gamePlayer.getId() != gp)
+                .findFirst().orElse(null);
 
         // data
         Map<String, Object> data = new LinkedHashMap<String, Object>();

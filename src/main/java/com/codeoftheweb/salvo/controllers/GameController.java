@@ -138,7 +138,7 @@ public class GameController {
         }
 
         // el player ya tiene ships
-        if (gamePlayer.getShips().isEmpty()) {
+        if (!gamePlayer.getShips().isEmpty()) {
             return this.createEntityResponse("error", "su usuario ya tiene barcos", HttpStatus.FORBIDDEN);
         }
 

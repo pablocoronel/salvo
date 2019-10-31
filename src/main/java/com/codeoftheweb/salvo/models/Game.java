@@ -81,6 +81,37 @@ public class Game {
 
     // logica de hits
     public List<Map<String, Object>> createHits(GamePlayer self, GamePlayer opponent) {
+        // json vacio si no hay oponente
+        if (self == null || opponent == null) {
+            Map<String, Object> mapa_vacio = new HashMap<String, Object>();
+
+            mapa_vacio.put("turn", "");
+            List<String> hitsLocations_vacio = new ArrayList<String>();
+            mapa_vacio.put("hitLocations", hitsLocations_vacio);
+
+            // combinar mapas de hits
+            Map<String, Long> mapa_vacio_damages = new HashMap<String, Long>();
+            mapa_vacio_damages.put("carrier", 0L);
+            mapa_vacio_damages.put("battleship", 0L);
+            mapa_vacio_damages.put("submarine", 0L);
+            mapa_vacio_damages.put("destroyer", 0L);
+            mapa_vacio_damages.put("patrolboat", 0L);
+            mapa_vacio_damages.put("carrierHits", 0L);
+            mapa_vacio_damages.put("battleshipHits", 0L);
+            mapa_vacio_damages.put("submarineHits", 0L);
+            mapa_vacio_damages.put("destroyerHits", 0L);
+            mapa_vacio_damages.put("patrolboatHits", 0L);
+
+            mapa_vacio.put("damages", mapa_vacio_damages);
+
+            mapa_vacio.put("missed", 0);
+
+            List<Map<String, Object>> lista_self_vacio = new ArrayList<Map<String, Object>>();
+            lista_self_vacio.add(mapa_vacio);
+
+            return lista_self_vacio;
+        }
+    /*****************************************************************************************/
         List<Map<String, Object>> lista_self = new ArrayList<Map<String, Object>>();
 
         List<Long> turnos_self = self.getSalvoes().stream().map(salvo -> salvo.getTurn()).collect(Collectors.toList());
