@@ -111,7 +111,7 @@ public class Game {
 
             return lista_self_vacio;
         }
-    /*****************************************************************************************/
+        /*****************************************************************************************/
         List<Map<String, Object>> lista_self = new ArrayList<Map<String, Object>>();
 
         List<Long> turnos_self = self.getSalvoes().stream().map(salvo -> salvo.getTurn()).collect(Collectors.toList());
@@ -154,64 +154,73 @@ public class Game {
         mapa_damages_total.put("patrolboat", 0L);
 
         turnos_self.forEach(turno -> {
-            Map<String, Long> mapa_damages = new HashMap<String, Long>();
-            mapa_damages.put("carrierHits", 0L);
-            mapa_damages.put("battleshipHits", 0L);
-            mapa_damages.put("submarineHits", 0L);
-            mapa_damages.put("destroyerHits", 0L);
-            mapa_damages.put("patrolboatHits", 0L);
+            // si no existe el turno en el oponente
+            long existe_turno_oponente = opponent.getSalvoes().stream()
+                    .filter(salvo -> salvo.getTurn() == turno)
+                    .count();
+
+            if (existe_turno_oponente == 1) {
 
 
-            Map<String, Object> mapa_turno = new HashMap<String, Object>();
-            List<String> hitsLocations = new ArrayList<String>();
+                Map<String, Long> mapa_damages = new HashMap<String, Long>();
+                mapa_damages.put("carrierHits", 0L);
+                mapa_damages.put("battleshipHits", 0L);
+                mapa_damages.put("submarineHits", 0L);
+                mapa_damages.put("destroyerHits", 0L);
+                mapa_damages.put("patrolboatHits", 0L);
 
 
-            mapa_turno.put("turn", turno);
-            List<String> intento = (List<String>) intentos_opponent.get(turno);
-
-            if (!intento.isEmpty()) {
-                intento.forEach(un_intento -> {
-                    barcos_nombre.forEach(b -> {
-                        List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
+                Map<String, Object> mapa_turno = new HashMap<String, Object>();
+                List<String> hitsLocations = new ArrayList<String>();
 
 
-                        cada_barco.forEach(s -> {
-                            // hitLocationes
-                            if (s == un_intento) {
-                                hitsLocations.add(s);
+                mapa_turno.put("turn", turno);
+                List<String> intento = (List<String>) intentos_opponent.get(turno);
 
-                                /**
-                                 * guarda por turno
-                                 */
-                                String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
-                                Long val = mapa_damages.get(nombre_key_damage_turno);
+                if (!intento.isEmpty()) {
+                    intento.forEach(un_intento -> {
+                        barcos_nombre.forEach(b -> {
+                            List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
 
-                                mapa_damages.put(nombre_key_damage_turno, val + 1);
 
-                                /**
-                                 * guarda el total
-                                 */
-                                String nombre_key_damage_total = b.toLowerCase().replaceAll(" ", "");
-                                Long val_total = mapa_damages_total.get(nombre_key_damage_total);
+                            cada_barco.forEach(s -> {
+                                // hitLocationes
+                                if (s == un_intento) {
+                                    hitsLocations.add(s);
 
-                                mapa_damages_total.put(nombre_key_damage_total, val_total + 1);
-                            }
+                                    /**
+                                     * guarda por turno
+                                     */
+                                    String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
+                                    Long val = mapa_damages.get(nombre_key_damage_turno);
+
+                                    mapa_damages.put(nombre_key_damage_turno, val + 1);
+
+                                    /**
+                                     * guarda el total
+                                     */
+                                    String nombre_key_damage_total = b.toLowerCase().replaceAll(" ", "");
+                                    Long val_total = mapa_damages_total.get(nombre_key_damage_total);
+
+                                    mapa_damages_total.put(nombre_key_damage_total, val_total + 1);
+                                }
+                            });
                         });
                     });
-                });
-            }
+                }
 
 
-            mapa_turno.put("hitLocations", hitsLocations);
+                mapa_turno.put("hitLocations", hitsLocations);
 
 
 //          combinar mapas de hits
-            mapa_damages.putAll(mapa_damages_total);
-            mapa_turno.put("damages", mapa_damages);
+                mapa_damages.putAll(mapa_damages_total);
+                mapa_turno.put("damages", mapa_damages);
 
-            mapa_turno.put("missed", 5 - hitsLocations.size());
+                mapa_turno.put("missed", 5 - hitsLocations.size());
 
-            lista_self.add(mapa_turno);
+                lista_self.add(mapa_turno);
+            }
         });
 
         return lista_self;
