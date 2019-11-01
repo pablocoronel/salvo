@@ -71,7 +71,7 @@ public class SalvoController {
 
         data.put("id", game.getId());
         data.put("created", game.getCreationDate());
-        data.put("gameState", "PLACESHIPS");
+        data.put("gameState", game_player_self.makeStateDTO());
         data.put("gamePlayers", game.getGamePlayers().stream().map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
         data.put("ships", game_player.getShips().stream().map(ship -> ship.makeShipDTO()));
         data.put("salvoes", game.getGamePlayers().stream().map(gamePlayer -> gamePlayer.getSalvoes())

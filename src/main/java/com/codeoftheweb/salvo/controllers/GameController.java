@@ -153,7 +153,8 @@ public class GameController {
 
     // guardar salvos
     @RequestMapping(value = "/games/players/{gamePlayerId}/salvoes", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, Object>> storeSalvoes(@PathVariable Long gamePlayerId, @RequestBody Salvo salvo, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> storeSalvoes(@PathVariable Long gamePlayerId, @RequestBody Salvo salvo,
+                                                            Authentication authentication) {
         // no está logueado
         if (this.isGuest(authentication)) {
             return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
@@ -180,7 +181,6 @@ public class GameController {
             salvo.setTurn(gamePlayer.getSalvoes().size() + 1);
         }
 
-
         // no repetir turno
         Long existe_turno = gamePlayer.getSalvoes().stream()
                 .filter(cada_salvo -> cada_salvo.getTurn() == salvo.getTurn()).count();
@@ -188,6 +188,23 @@ public class GameController {
         if (existe_turno > 0) {
             return this.createEntityResponse("error", "ya se envio el turno", HttpStatus.FORBIDDEN);
         }
+
+        // evitar enviar dos salvos seguidos
+        int max_salvo_current = gamePlayer.getSalvoes().size();
+        GamePlayer game_player_oponente = gamePlayer.getGame().getGamePlayers()
+                .stream()
+                .filter(gamePlayer1 -> gamePlayer1.getId() != gamePlayerId)
+                .findAny()
+                .orElse(null);
+
+        if (game_player_oponente != null) {
+            int max_salvo_oponente = game_player_oponente.getSalvoes().size();
+
+            if ((max_salvo_current - max_salvo_oponente) == 1) {
+                return this.createEntityResponse("error", "No puede ingresar salvos seguidos", HttpStatus.FORBIDDEN);
+            }
+        }
+
 
         /**
          * guardar salvo

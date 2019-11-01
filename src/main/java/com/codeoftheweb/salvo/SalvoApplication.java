@@ -47,6 +47,7 @@ public class SalvoApplication {
             Player j_bauer = new Player("j.bauer@ctu.gov");
             j_bauer.setPassword(passwordEncoder().encode("24"));
             Player obrian = new Player("c.obrian@ctu.gov");
+            obrian.setPassword(passwordEncoder().encode("42"));
             Player almeida = new Player("t.almeida@ctu.gov");
             Player kim_bauer = new Player("kim_bauer@gmail.com");
 
