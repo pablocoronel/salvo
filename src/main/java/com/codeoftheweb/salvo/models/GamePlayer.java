@@ -2,7 +2,9 @@ package com.codeoftheweb.salvo.models;
 
 import com.codeoftheweb.salvo.models.Game;
 import com.codeoftheweb.salvo.models.Player;
+import com.codeoftheweb.salvo.repositories.ScoreRepository;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.util.*;
@@ -84,32 +86,6 @@ public class GamePlayer {
         dto.put("id", this.getId());
         dto.put("player", this.getPlayer().makePlayerDTO());
         return dto;
-    }
-
-    // estado del juego
-    public String makeStateDTO() {
-        String state = "PLACESHIPS";
-
-        // WAITINGFOROPP
-        GamePlayer opponent_game_player = this.getGame().getGamePlayers()
-                .stream()
-                .filter(gamePlayer -> gamePlayer.getId() != this.getId())
-                .findFirst()
-                .orElse(null);
-
-        if (this.getShips().isEmpty()) {
-            state = "PLACESHIPS";
-        } else if (opponent_game_player == null) {
-            state = "WAITINGFOROPP";
-        } else if (opponent_game_player.getShips().isEmpty()) {
-            state = "WAIT";
-        }else if(this.getSalvoes().size() > opponent_game_player.getSalvoes().size()){
-            state = "WAIT";
-        } else {
-            state = "PLAY";
-        }
-
-        return state;
     }
 
     // agrega barcos al gamePlayer
