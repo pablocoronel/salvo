@@ -77,7 +77,7 @@ public class SalvoController {
         data.put("ships", game_player.getShips().stream().map(ship -> ship.makeShipDTO()));
         data.put("salvoes", game.getGamePlayers().stream().map(gamePlayer -> gamePlayer.getSalvoes())
                 .flatMap(salvos -> salvos.stream()).map(s -> s.makeSalvoDTO()));
-        data.put("hits", game.makeHitsDTO(game_player_self, game_player_opponent));
+        data.put("hits", this.makeHitsDTO(game_player_self, game_player_opponent));
 
         return this.createEntityResponse(data, HttpStatus.OK);
     }
@@ -136,8 +136,7 @@ public class SalvoController {
             int cantidad_ships = self_game_player.getShips().size();
             int contador_ships_hundidos = 0;
 
-            Map<String, Object> hits = self_game_player.getGame().makeHitsDTO(self_game_player, opponent_game_player);
-
+            Map<String, Object> hits = this.makeHitsDTO(self_game_player, opponent_game_player);
             List hit = (List) hits.getOrDefault("self", null);
             if (hit.size() > 0) {
                 Map mapa_damages = (Map) hit.get(hit.size() - 1);
@@ -168,7 +167,137 @@ public class SalvoController {
         scoreRepository.save(score_1);
     }
 
+    // hits
+    private Map<String, Object> makeHitsDTO(GamePlayer self, GamePlayer opponent) {
+        Map<String, Object> data = new HashMap<String, Object>();
 
+        data.put("self", this.createHits(self, opponent));
+        data.put("opponent", this.createHits(opponent, self));
+
+        return data;
+    }
+
+    // logica de hits
+    private List<Map<String, Object>> createHits(GamePlayer self, GamePlayer opponent) {
+        // json vacio si no hay oponente
+        if (self == null || opponent == null) {
+            List<Map<String, Object>> lista_self_vacio = new ArrayList<Map<String, Object>>();
+            return lista_self_vacio;
+        }
+        /*****************************************************************************************/
+        List<Map<String, Object>> lista_self = new ArrayList<Map<String, Object>>();
+
+        List<Long> turnos_self = self.getSalvoes().stream().map(salvo -> salvo.getTurn()).collect(Collectors.toList());
+        turnos_self.sort((o1, o2) -> {
+            int res = 0;
+            if (o1 < o2) {
+                res = -1;
+            }
+            if (o1 == o2) {
+                res = 0;
+            }
+            if (o1 > o2) {
+                res = 1;
+            }
+
+            return res;
+        });
+
+        // mis ships
+        Map<String, Object> self_ubicaciones = new HashMap<String, Object>();
+        self.getShips().forEach(ship -> {
+            self_ubicaciones.put(ship.getType(), ship.getLocations());
+        });
+
+        Set<String> barcos_nombre = self_ubicaciones.keySet();
+
+        //intentos del oponente
+        Map<Long, Object> intentos_opponent = new HashMap<Long, Object>();
+        opponent.getSalvoes().forEach(salvo -> intentos_opponent.put(salvo.getTurn(), salvo.getLocations()));
+
+
+        /**
+         * Mapa
+         */
+        Map<String, Long> mapa_damages_total = new HashMap<String, Long>();
+        mapa_damages_total.put("carrier", 0L);
+        mapa_damages_total.put("battleship", 0L);
+        mapa_damages_total.put("submarine", 0L);
+        mapa_damages_total.put("destroyer", 0L);
+        mapa_damages_total.put("patrolboat", 0L);
+
+        turnos_self.forEach(turno -> {
+            // si no existe el turno en el oponente
+            long existe_turno_oponente = opponent.getSalvoes().stream()
+                    .filter(salvo -> salvo.getTurn() == turno)
+                    .count();
+
+            if (existe_turno_oponente == 1) {
+
+
+                Map<String, Long> mapa_damages = new HashMap<String, Long>();
+                mapa_damages.put("carrierHits", 0L);
+                mapa_damages.put("battleshipHits", 0L);
+                mapa_damages.put("submarineHits", 0L);
+                mapa_damages.put("destroyerHits", 0L);
+                mapa_damages.put("patrolboatHits", 0L);
+
+
+                Map<String, Object> mapa_turno = new HashMap<String, Object>();
+                List<String> hitsLocations = new ArrayList<String>();
+
+
+                mapa_turno.put("turn", turno);
+                List<String> intento = (List<String>) intentos_opponent.get(turno);
+
+                if (!intento.isEmpty()) {
+                    intento.forEach(un_intento -> {
+                        barcos_nombre.forEach(b -> {
+                            List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
+
+
+                            cada_barco.forEach(s -> {
+                                // hitLocationes
+                                if (s == un_intento) {
+                                    hitsLocations.add(s);
+
+                                    /**
+                                     * guarda por turno
+                                     */
+                                    String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
+                                    Long val = mapa_damages.get(nombre_key_damage_turno);
+
+                                    mapa_damages.put(nombre_key_damage_turno, val + 1);
+
+                                    /**
+                                     * guarda el total
+                                     */
+                                    String nombre_key_damage_total = b.toLowerCase().replaceAll(" ", "");
+                                    Long val_total = mapa_damages_total.get(nombre_key_damage_total);
+
+                                    mapa_damages_total.put(nombre_key_damage_total, val_total + 1);
+                                }
+                            });
+                        });
+                    });
+                }
+
+
+                mapa_turno.put("hitLocations", hitsLocations);
+
+
+//          combinar mapas de hits
+                mapa_damages.putAll(mapa_damages_total);
+                mapa_turno.put("damages", mapa_damages);
+
+                mapa_turno.put("missed", 5 - hitsLocations.size());
+
+                lista_self.add(mapa_turno);
+            }
+        });
+
+        return lista_self;
+    }
 
     // saber si un usuario está logueado
     private boolean isGuest(Authentication authentication) {
