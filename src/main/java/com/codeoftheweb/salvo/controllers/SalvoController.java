@@ -74,23 +74,23 @@ public class SalvoController {
         data.put("created", game.getCreationDate());
         data.put("gameState", this.makeStateDTO(game_player_self));
         data.put("gamePlayers", game.getGamePlayers()
-                                        .stream()
-                                        .map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
+                .stream()
+                .map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
         data.put("ships", game_player.getShips()
-                                        .stream()
-                                        .map(ship -> ship.makeShipDTO()));
+                .stream()
+                .map(ship -> ship.makeShipDTO()));
         data.put("salvoes", game.getGamePlayers()
-                                        .stream()
-                                        .map(gamePlayer -> gamePlayer.getSalvoes())
-                                        .flatMap(salvos -> salvos.stream())
-                                        .map(s -> s.makeSalvoDTO()));
+                .stream()
+                .map(gamePlayer -> gamePlayer.getSalvoes())
+                .flatMap(salvos -> salvos.stream())
+                .map(s -> s.makeSalvoDTO()));
         data.put("hits", this.makeHitsDTO(game_player_self, game_player_opponent));
 
         return this.createEntityResponse(data, HttpStatus.OK);
     }
 
     // estado del juego
-    private String makeStateDTO(GamePlayer game_player_self) {
+    public String makeStateDTO(GamePlayer game_player_self) {
         String state = "PLACESHIPS";
 
         // WAITINGFOROPP
@@ -170,9 +170,13 @@ public class SalvoController {
 
     private void storeScore(Player player, Game game, double score) {
         Date date = new Date();
+        Score nuevo_score = new Score(player, game, date, score);
 
-        Score score_1 = new Score(player, game, date, score);
-        scoreRepository.save(score_1);
+        Score ya_existe = scoreRepository.findByPlayerAndGame(player, game);
+
+        if (ya_existe == null) {
+            scoreRepository.save(nuevo_score);
+        }
     }
 
     // hits
@@ -194,9 +198,9 @@ public class SalvoController {
         }
 
         List<Long> turnos_self = self.getSalvoes()
-                                        .stream()
-                                        .map(salvo -> salvo.getTurn())
-                                        .collect(Collectors.toList());
+                .stream()
+                .map(salvo -> salvo.getTurn())
+                .collect(Collectors.toList());
         turnos_self.sort((o1, o2) -> (int) (o1 - o2));
 
         // mis ships
@@ -222,9 +226,9 @@ public class SalvoController {
         turnos_self.forEach(turno -> {
             // si no existe el turno en el oponente
             long existe_turno_oponente = opponent.getSalvoes()
-                                                    .stream()
-                                                    .filter(salvo -> salvo.getTurn() == turno)
-                                                    .count();
+                    .stream()
+                    .filter(salvo -> salvo.getTurn() == turno)
+                    .count();
 
             if (existe_turno_oponente == 1) {
                 Map<String, Long> mapa_damages = new HashMap<String, Long>();
@@ -250,15 +254,15 @@ public class SalvoController {
 
                                     /** guarda por turno */
                                     String nombre_key_damage_turno = nombre.toLowerCase()
-                                                                            .replaceAll(" ", "")
-                                                                            .concat("Hits");
+                                            .replaceAll(" ", "")
+                                            .concat("Hits");
 
                                     Long valor_hit = mapa_damages.get(nombre_key_damage_turno);
                                     mapa_damages.put(nombre_key_damage_turno, valor_hit + 1);
 
                                     /** guarda el total de hits */
                                     String nombre_key_damage_total = nombre.toLowerCase()
-                                                                            .replaceAll(" ", "");
+                                            .replaceAll(" ", "");
 
                                     Long valor_total = mapa_damages_total.get(nombre_key_damage_total);
                                     mapa_damages_total.put(nombre_key_damage_total, valor_total + 1);
@@ -272,7 +276,7 @@ public class SalvoController {
                 mapa_turno.put("hitLocations", hitsLocations);
                 mapa_damages.putAll(mapa_damages_total); // combinar mapas de hits
                 mapa_turno.put("damages", mapa_damages);
-                mapa_turno.put("missed", 5 - hitsLocations.size());
+                mapa_turno.put("missed", intento.size() - hitsLocations.size());
 
                 lista_self.add(mapa_turno);
             }

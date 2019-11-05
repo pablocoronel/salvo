@@ -206,13 +206,12 @@ public class GameController {
             }
         }
 
-
         /**
          * guardar salvo
          */
         salvo.setGamePlayer(gamePlayer);
         salvoRepository.save(salvo);
-        return this.createEntityResponse("OK", "saved", HttpStatus.OK);
+        return this.createEntityResponse("OK", "Saved", HttpStatus.OK);
     }
 
     // saber si un usuario está logueado
