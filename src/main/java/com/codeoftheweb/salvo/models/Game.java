@@ -68,9 +68,4 @@ public class Game {
         dto.put("scores", this.getScores().stream().map(score -> score.makeScoreDTO()));
         return dto;
     }
-
-//    public void addScore(Score score){
-//        score.setGame(this);
-//        this.scores.add(score);
-//    }
 }

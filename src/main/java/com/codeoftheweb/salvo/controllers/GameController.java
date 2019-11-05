@@ -55,7 +55,7 @@ public class GameController {
     @RequestMapping(value = "/games", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> createGame(Authentication authentication) {
         if (this.isGuest(authentication)) {
-            return this.createEntityResponse("error", "sin autorizacion", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Not authorized", HttpStatus.UNAUTHORIZED);
         }
 
         // crear el juego
@@ -81,25 +81,25 @@ public class GameController {
     public ResponseEntity<Map<String, Object>> joinGame(@PathVariable Long game_id, Authentication authentication) {
         // sin login
         if (this.isGuest(authentication)) {
-            return this.createEntityResponse("error", "sin autorizacion", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Not authorized", HttpStatus.UNAUTHORIZED);
         }
 
         Player current_player = playerRepository.findByUserName(authentication.getName());
 
         // con id de game vacio
         if (game_id.equals(null)) {
-            return this.createEntityResponse("error", "No existe el juego", HttpStatus.FORBIDDEN);
+            return this.createEntityResponse("error", "Game not found", HttpStatus.FORBIDDEN);
         }
 
         // juego con un solo jugador
         Game juego = gameRepository.findById(game_id).orElse(null);
         if (juego == null) {
-            return this.createEntityResponse("error", "No existe el juego", HttpStatus.FORBIDDEN);
+            return this.createEntityResponse("error", "Game not found", HttpStatus.FORBIDDEN);
         }
 
         // si el juego no tiene un solo player
         if (juego.getGamePlayers().size() != 1) {
-            return this.createEntityResponse("error", "El juego está lleno", HttpStatus.FORBIDDEN);
+            return this.createEntityResponse("error", "Game full", HttpStatus.FORBIDDEN);
         }
 
         /**
@@ -120,7 +120,7 @@ public class GameController {
                                                          Authentication authentication) {
         // no está logueado
         if (this.isGuest(authentication)) {
-            return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "User not found", HttpStatus.UNAUTHORIZED);
         }
 
         // player logueado
@@ -129,17 +129,17 @@ public class GameController {
         // no existe el gamePlayer id
         GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
         if (gamePlayer == null) {
-            return this.createEntityResponse("error", "no existe la partida", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Match not found", HttpStatus.UNAUTHORIZED);
         }
 
         // el usuario logueado no es del juego
         if (gamePlayer.getPlayer().getId() != current_player.getId()) {
-            return this.createEntityResponse("error", "su usuario no tiene permiso", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "User does not have permission", HttpStatus.UNAUTHORIZED);
         }
 
         // el player ya tiene ships
         if (!gamePlayer.getShips().isEmpty()) {
-            return this.createEntityResponse("error", "su usuario ya tiene barcos", HttpStatus.FORBIDDEN);
+            return this.createEntityResponse("error", "You already has ships", HttpStatus.FORBIDDEN);
         }
 
         /**
@@ -147,7 +147,7 @@ public class GameController {
          */
         ships.forEach(ship -> ship.setGamePlayer(gamePlayer));
         ships.forEach(shipR -> shipRepository.save(shipR));
-        return createEntityResponse("OK", "ubicaciones guardadas", HttpStatus.CREATED);
+        return createEntityResponse("OK", "Saved locations", HttpStatus.CREATED);
     }
 
 
@@ -157,7 +157,7 @@ public class GameController {
                                                             Authentication authentication) {
         // no está logueado
         if (this.isGuest(authentication)) {
-            return this.createEntityResponse("error", "no hay usuario", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "User not found", HttpStatus.UNAUTHORIZED);
         }
 
         // player logueado
@@ -166,12 +166,12 @@ public class GameController {
         // no existe el gamePlayer id
         GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
         if (gamePlayer == null) {
-            return this.createEntityResponse("error", "no existe la partida", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Match not found", HttpStatus.UNAUTHORIZED);
         }
 
         // el usuario logueado no es del juego
         if (gamePlayer.getPlayer().getId() != current_player.getId()) {
-            return this.createEntityResponse("error", "su usuario no tiene permiso", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "User does not have permission", HttpStatus.UNAUTHORIZED);
         }
 
         // setear turno
@@ -186,22 +186,23 @@ public class GameController {
                 .filter(cada_salvo -> cada_salvo.getTurn() == salvo.getTurn()).count();
 
         if (existe_turno > 0) {
-            return this.createEntityResponse("error", "ya se envio el turno", HttpStatus.FORBIDDEN);
+            return this.createEntityResponse("error", "The turn already exists", HttpStatus.FORBIDDEN);
         }
 
         // evitar enviar dos salvos seguidos
         int max_salvo_current = gamePlayer.getSalvoes().size();
-        GamePlayer game_player_oponente = gamePlayer.getGame().getGamePlayers()
-                .stream()
-                .filter(gamePlayer1 -> gamePlayer1.getId() != gamePlayerId)
-                .findAny()
-                .orElse(null);
+        GamePlayer game_player_oponente = gamePlayer.getGame()
+                                                    .getGamePlayers()
+                                                    .stream()
+                                                    .filter(gamePlayer1 -> gamePlayer1.getId() != gamePlayerId)
+                                                    .findAny()
+                                                    .orElse(null);
 
         if (game_player_oponente != null) {
             int max_salvo_oponente = game_player_oponente.getSalvoes().size();
 
             if ((max_salvo_current - max_salvo_oponente) == 1) {
-                return this.createEntityResponse("error", "No puede ingresar salvos seguidos", HttpStatus.FORBIDDEN);
+                return this.createEntityResponse("error", "You cannot add consecutive salvoes", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -211,7 +212,7 @@ public class GameController {
          */
         salvo.setGamePlayer(gamePlayer);
         salvoRepository.save(salvo);
-        return this.createEntityResponse("OK", "guardado", HttpStatus.OK);
+        return this.createEntityResponse("OK", "saved", HttpStatus.OK);
     }
 
     // saber si un usuario está logueado

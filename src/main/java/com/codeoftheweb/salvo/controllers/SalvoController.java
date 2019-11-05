@@ -41,7 +41,7 @@ public class SalvoController {
         GamePlayer game_player = gamePlayerRepository.findById(gp).orElse(null);
 
         if (game_player == null) {
-            return this.createEntityResponse("error", "no encontrado", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Not found", HttpStatus.UNAUTHORIZED);
         }
 
         Game game = game_player.getGame();
@@ -49,7 +49,7 @@ public class SalvoController {
 
         // No ver el juego de otro player
         if (game_player.getPlayer().getId() != current_user.getId()) {
-            return this.createEntityResponse("error", "no autorizado", HttpStatus.UNAUTHORIZED);
+            return this.createEntityResponse("error", "Not authorized", HttpStatus.UNAUTHORIZED);
         }
 
         // gameplayers de self y oponente
@@ -73,10 +73,17 @@ public class SalvoController {
         data.put("id", game.getId());
         data.put("created", game.getCreationDate());
         data.put("gameState", this.makeStateDTO(game_player_self));
-        data.put("gamePlayers", game.getGamePlayers().stream().map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
-        data.put("ships", game_player.getShips().stream().map(ship -> ship.makeShipDTO()));
-        data.put("salvoes", game.getGamePlayers().stream().map(gamePlayer -> gamePlayer.getSalvoes())
-                .flatMap(salvos -> salvos.stream()).map(s -> s.makeSalvoDTO()));
+        data.put("gamePlayers", game.getGamePlayers()
+                                        .stream()
+                                        .map(gamePlayer1 -> gamePlayer1.makeGamePlayerDTO()));
+        data.put("ships", game_player.getShips()
+                                        .stream()
+                                        .map(ship -> ship.makeShipDTO()));
+        data.put("salvoes", game.getGamePlayers()
+                                        .stream()
+                                        .map(gamePlayer -> gamePlayer.getSalvoes())
+                                        .flatMap(salvos -> salvos.stream())
+                                        .map(s -> s.makeSalvoDTO()));
         data.put("hits", this.makeHitsDTO(game_player_self, game_player_opponent));
 
         return this.createEntityResponse(data, HttpStatus.OK);
@@ -138,6 +145,7 @@ public class SalvoController {
 
             Map<String, Object> hits = this.makeHitsDTO(self_game_player, opponent_game_player);
             List hit = (List) hits.getOrDefault("self", null);
+
             if (hit.size() > 0) {
                 Map mapa_damages = (Map) hit.get(hit.size() - 1);
                 Map damages = (Map) mapa_damages.get("damages");
@@ -179,29 +187,17 @@ public class SalvoController {
 
     // logica de hits
     private List<Map<String, Object>> createHits(GamePlayer self, GamePlayer opponent) {
-        // json vacio si no hay oponente
-        if (self == null || opponent == null) {
-            List<Map<String, Object>> lista_self_vacio = new ArrayList<Map<String, Object>>();
-            return lista_self_vacio;
-        }
-        /*****************************************************************************************/
         List<Map<String, Object>> lista_self = new ArrayList<Map<String, Object>>();
 
-        List<Long> turnos_self = self.getSalvoes().stream().map(salvo -> salvo.getTurn()).collect(Collectors.toList());
-        turnos_self.sort((o1, o2) -> {
-            int res = 0;
-            if (o1 < o2) {
-                res = -1;
-            }
-            if (o1 == o2) {
-                res = 0;
-            }
-            if (o1 > o2) {
-                res = 1;
-            }
+        if (self == null || opponent == null) {
+            return lista_self;
+        }
 
-            return res;
-        });
+        List<Long> turnos_self = self.getSalvoes()
+                                        .stream()
+                                        .map(salvo -> salvo.getTurn())
+                                        .collect(Collectors.toList());
+        turnos_self.sort((o1, o2) -> (int) (o1 - o2));
 
         // mis ships
         Map<String, Object> self_ubicaciones = new HashMap<String, Object>();
@@ -215,10 +211,7 @@ public class SalvoController {
         Map<Long, Object> intentos_opponent = new HashMap<Long, Object>();
         opponent.getSalvoes().forEach(salvo -> intentos_opponent.put(salvo.getTurn(), salvo.getLocations()));
 
-
-        /**
-         * Mapa
-         */
+        // Mapa de hits totales
         Map<String, Long> mapa_damages_total = new HashMap<String, Long>();
         mapa_damages_total.put("carrier", 0L);
         mapa_damages_total.put("battleship", 0L);
@@ -228,13 +221,12 @@ public class SalvoController {
 
         turnos_self.forEach(turno -> {
             // si no existe el turno en el oponente
-            long existe_turno_oponente = opponent.getSalvoes().stream()
-                    .filter(salvo -> salvo.getTurn() == turno)
-                    .count();
+            long existe_turno_oponente = opponent.getSalvoes()
+                                                    .stream()
+                                                    .filter(salvo -> salvo.getTurn() == turno)
+                                                    .count();
 
             if (existe_turno_oponente == 1) {
-
-
                 Map<String, Long> mapa_damages = new HashMap<String, Long>();
                 mapa_damages.put("carrierHits", 0L);
                 mapa_damages.put("battleshipHits", 0L);
@@ -242,54 +234,44 @@ public class SalvoController {
                 mapa_damages.put("destroyerHits", 0L);
                 mapa_damages.put("patrolboatHits", 0L);
 
-
                 Map<String, Object> mapa_turno = new HashMap<String, Object>();
                 List<String> hitsLocations = new ArrayList<String>();
-
-
-                mapa_turno.put("turn", turno);
                 List<String> intento = (List<String>) intentos_opponent.get(turno);
 
                 if (!intento.isEmpty()) {
                     intento.forEach(un_intento -> {
-                        barcos_nombre.forEach(b -> {
-                            List<String> cada_barco = (List<String>) self_ubicaciones.get(b);
+                        barcos_nombre.forEach(nombre -> {
+                            List<String> cada_barco = (List<String>) self_ubicaciones.get(nombre);
 
-
-                            cada_barco.forEach(s -> {
+                            cada_barco.forEach(ubicacion_barco -> {
                                 // hitLocationes
-                                if (s == un_intento) {
-                                    hitsLocations.add(s);
+                                if (ubicacion_barco == un_intento) {
+                                    hitsLocations.add(ubicacion_barco);
 
-                                    /**
-                                     * guarda por turno
-                                     */
-                                    String nombre_key_damage_turno = b.toLowerCase().replaceAll(" ", "").concat("Hits");
-                                    Long val = mapa_damages.get(nombre_key_damage_turno);
+                                    /** guarda por turno */
+                                    String nombre_key_damage_turno = nombre.toLowerCase()
+                                                                            .replaceAll(" ", "")
+                                                                            .concat("Hits");
 
-                                    mapa_damages.put(nombre_key_damage_turno, val + 1);
+                                    Long valor_hit = mapa_damages.get(nombre_key_damage_turno);
+                                    mapa_damages.put(nombre_key_damage_turno, valor_hit + 1);
 
-                                    /**
-                                     * guarda el total
-                                     */
-                                    String nombre_key_damage_total = b.toLowerCase().replaceAll(" ", "");
-                                    Long val_total = mapa_damages_total.get(nombre_key_damage_total);
+                                    /** guarda el total de hits */
+                                    String nombre_key_damage_total = nombre.toLowerCase()
+                                                                            .replaceAll(" ", "");
 
-                                    mapa_damages_total.put(nombre_key_damage_total, val_total + 1);
+                                    Long valor_total = mapa_damages_total.get(nombre_key_damage_total);
+                                    mapa_damages_total.put(nombre_key_damage_total, valor_total + 1);
                                 }
                             });
                         });
                     });
                 }
 
-
+                mapa_turno.put("turn", turno);
                 mapa_turno.put("hitLocations", hitsLocations);
-
-
-//          combinar mapas de hits
-                mapa_damages.putAll(mapa_damages_total);
+                mapa_damages.putAll(mapa_damages_total); // combinar mapas de hits
                 mapa_turno.put("damages", mapa_damages);
-
                 mapa_turno.put("missed", 5 - hitsLocations.size());
 
                 lista_self.add(mapa_turno);

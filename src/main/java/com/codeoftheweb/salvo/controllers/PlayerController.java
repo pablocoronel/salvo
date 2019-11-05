@@ -33,13 +33,13 @@ public class PlayerController {
 
         // validar data ingresada
         if (email.isEmpty() || password.isEmpty()) {
-            respuesta = this.createEntityResponse("error", "email o password vacio", HttpStatus.FORBIDDEN);
+            respuesta = this.createEntityResponse("error", "Empty email or password", HttpStatus.FORBIDDEN);
         }
 
         // consultar si ya existe un usuario igual
         Player player = playerRepository.findByUserName(email);
         if (player != null) {
-            respuesta = this.createEntityResponse("error", "ya existe el usuario", HttpStatus.CONFLICT);
+            respuesta = this.createEntityResponse("error", "The user already exists", HttpStatus.CONFLICT);
         } else {
             Player nuevo = new Player();
             nuevo.setUserName(email);
@@ -47,7 +47,7 @@ public class PlayerController {
 
             playerRepository.save(nuevo);
 
-            respuesta = this.createEntityResponse("success", "usuario creado", HttpStatus.CREATED);
+            respuesta = this.createEntityResponse("success", "User created", HttpStatus.CREATED);
         }
 
         return respuesta;
