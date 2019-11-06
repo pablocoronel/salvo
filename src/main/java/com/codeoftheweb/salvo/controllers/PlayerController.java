@@ -2,6 +2,7 @@ package com.codeoftheweb.salvo.controllers;
 
 import com.codeoftheweb.salvo.models.Player;
 import com.codeoftheweb.salvo.repositories.PlayerRepository;
+import com.codeoftheweb.salvo.services.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,9 @@ public class PlayerController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    GameService gameService;
+
     // crear un player
     @RequestMapping(path = "/players", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> createPlayer(@RequestParam String email, @RequestParam String password) {
@@ -33,13 +37,13 @@ public class PlayerController {
 
         // validar data ingresada
         if (email.isEmpty() || password.isEmpty()) {
-            respuesta = this.createEntityResponse("error", "Empty email or password", HttpStatus.FORBIDDEN);
+            respuesta = gameService.createEntityResponse("error", "Empty email or password", HttpStatus.FORBIDDEN);
         }
 
         // consultar si ya existe un usuario igual
         Player player = playerRepository.findByUserName(email);
         if (player != null) {
-            respuesta = this.createEntityResponse("error", "The user already exists", HttpStatus.CONFLICT);
+            respuesta = gameService.createEntityResponse("error", "The user already exists", HttpStatus.CONFLICT);
         } else {
             Player nuevo = new Player();
             nuevo.setUserName(email);
@@ -47,26 +51,9 @@ public class PlayerController {
 
             playerRepository.save(nuevo);
 
-            respuesta = this.createEntityResponse("success", "User created", HttpStatus.CREATED);
+            respuesta = gameService.createEntityResponse("success", "User created", HttpStatus.CREATED);
         }
 
         return respuesta;
-    }
-
-    // saber si un usuario está logueado
-    private boolean isGuest(Authentication authentication) {
-        return authentication == null || authentication instanceof AnonymousAuthenticationToken;
-    }
-
-    // hacer un ResponseEntity de map
-    private ResponseEntity<Map<String, Object>> createEntityResponse(String clave, String mensaje, HttpStatus httpStatus) {
-        Map<String, Object> mapa = new HashMap<String, Object>();
-
-        mapa.put(clave, mensaje);
-        return new ResponseEntity<Map<String, Object>>(mapa, httpStatus);
-    }
-
-    private ResponseEntity<Map<String, Object>> createEntityResponse(Map mapa, HttpStatus httpStatus) {
-        return new ResponseEntity<Map<String, Object>>(mapa, httpStatus);
     }
 }
