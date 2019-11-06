@@ -71,9 +71,4 @@ public class Player {
 
         return dto;
     }
-
-//    public void addScore(Score score){
-//        score.setPlayer(this);
-//        this.scores.add(score);
-//    }
 }

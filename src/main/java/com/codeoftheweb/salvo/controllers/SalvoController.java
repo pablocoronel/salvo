@@ -53,13 +53,13 @@ public class SalvoController {
             return gameService.createEntityResponse("error", "Not authorized", HttpStatus.UNAUTHORIZED);
         }
 
-        // gameplayers de self y oponente
+        // game players de self y oponente
         /**
          * game player self
          */
         GamePlayer game_player_self = game_player;
 
-        long id_juego = game.getId();
+        long game_id = game.getId();
 
         /**
          * game player opponent

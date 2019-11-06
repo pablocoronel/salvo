@@ -33,27 +33,27 @@ public class PlayerController {
     // crear un player
     @RequestMapping(path = "/players", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> createPlayer(@RequestParam String email, @RequestParam String password) {
-        ResponseEntity<Map<String, Object>> respuesta = null;
+        ResponseEntity<Map<String, Object>> response = null;
 
         // validar data ingresada
         if (email.isEmpty() || password.isEmpty()) {
-            respuesta = gameService.createEntityResponse("error", "Empty email or password", HttpStatus.FORBIDDEN);
+            response = gameService.createEntityResponse("error", "Empty email or password", HttpStatus.FORBIDDEN);
         }
 
         // consultar si ya existe un usuario igual
         Player player = playerRepository.findByUserName(email);
         if (player != null) {
-            respuesta = gameService.createEntityResponse("error", "The user already exists", HttpStatus.CONFLICT);
+            response = gameService.createEntityResponse("error", "The user already exists", HttpStatus.CONFLICT);
         } else {
-            Player nuevo = new Player();
-            nuevo.setUserName(email);
-            nuevo.setPassword(passwordEncoder.encode(password));
+            Player new_player = new Player();
+            new_player.setUserName(email);
+            new_player.setPassword(passwordEncoder.encode(password));
 
-            playerRepository.save(nuevo);
+            playerRepository.save(new_player);
 
-            respuesta = gameService.createEntityResponse("success", "User created", HttpStatus.CREATED);
+            response = gameService.createEntityResponse("success", "User created", HttpStatus.CREATED);
         }
 
-        return respuesta;
+        return response;
     }
 }

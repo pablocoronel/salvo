@@ -63,21 +63,21 @@ public class GameController {
         }
 
         // crear el juego
-        Game nuevo_juego = new Game();
-        gameRepository.save(nuevo_juego);
+        Game new_game = new Game();
+        gameRepository.save(new_game);
 
         // player logueado
         Player current_player = playerRepository.findByUserName(authentication.getName());
 
         // nuevo game player
-        GamePlayer nuevo_game_player = new GamePlayer(nuevo_juego, current_player, new Date());
-        GamePlayer guardado = gamePlayerRepository.save(nuevo_game_player);
+        GamePlayer new_game_player = new GamePlayer(new_game, current_player, new Date());
+        GamePlayer game_player_saved = gamePlayerRepository.save(new_game_player);
 
         // respuesta
-        Map<String, Object> mapa = new HashMap<String, Object>();
-        mapa.put("gpid", guardado.getId());
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("gpid", game_player_saved.getId());
 
-        return gameService.createEntityResponse(mapa, HttpStatus.CREATED);
+        return gameService.createEntityResponse(map, HttpStatus.CREATED);
     }
 
     // unirse a un juego
@@ -96,26 +96,26 @@ public class GameController {
         }
 
         // juego con un solo jugador
-        Game juego = gameRepository.findById(game_id).orElse(null);
-        if (juego == null) {
+        Game game = gameRepository.findById(game_id).orElse(null);
+        if (game == null) {
             return gameService.createEntityResponse("error", "Game not found", HttpStatus.FORBIDDEN);
         }
 
         // si el juego no tiene un solo player
-        if (juego.getGamePlayers().size() != 1) {
+        if (game.getGamePlayers().size() != 1) {
             return gameService.createEntityResponse("error", "Game full", HttpStatus.FORBIDDEN);
         }
 
         /**
          * crear y guardar el game player
          */
-        GamePlayer nuevo_game_player = new GamePlayer(juego, current_player, new Date());
-        GamePlayer game_player_guardado = gamePlayerRepository.save(nuevo_game_player);
+        GamePlayer new_game_player = new GamePlayer(game, current_player, new Date());
+        GamePlayer game_player_saved = gamePlayerRepository.save(new_game_player);
 
-        Map<String, Object> mapa = new HashMap<String, Object>();
-        mapa.put("gpid", game_player_guardado.getId());
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("gpid", game_player_saved.getId());
 
-        return gameService.createEntityResponse(mapa, HttpStatus.CREATED);
+        return gameService.createEntityResponse(map, HttpStatus.CREATED);
     }
 
     // guardar posiciones de ships
@@ -186,39 +186,39 @@ public class GameController {
         }
 
         // no repetir turno
-        Long existe_turno = gamePlayer.getSalvoes().stream()
-                .filter(cada_salvo -> cada_salvo.getTurn() == salvo.getTurn()).count();
+        Long exists_turn = gamePlayer.getSalvoes().stream()
+                .filter(each_salvo -> each_salvo.getTurn() == salvo.getTurn()).count();
 
-        if (existe_turno > 0) {
+        if (exists_turn > 0) {
             return gameService.createEntityResponse("error", "The turn already exists", HttpStatus.FORBIDDEN);
         }
 
         // evitar enviar dos salvos seguidos
         int max_salvo_current = gamePlayer.getSalvoes().size();
-        GamePlayer game_player_oponente = gamePlayer.getGame()
+        GamePlayer opponent_game_player = gamePlayer.getGame()
                 .getGamePlayers()
                 .stream()
                 .filter(gamePlayer1 -> gamePlayer1.getId() != gamePlayerId)
                 .findAny()
                 .orElse(null);
 
-        if (game_player_oponente != null) {
-            int max_salvo_oponente = game_player_oponente.getSalvoes().size();
+        if (opponent_game_player != null) {
+            int max_salvo_opponent = opponent_game_player.getSalvoes().size();
 
-            if ((max_salvo_current - max_salvo_oponente) == 1) {
+            if ((max_salvo_current - max_salvo_opponent) == 1) {
                 return gameService.createEntityResponse("error", "You cannot add consecutive salvoes", HttpStatus.FORBIDDEN);
             }
         }
 
         // no enviar salvoes sin ya terminó el juego
-        List<String> estados_game_over = new ArrayList<String>();
-        estados_game_over.add("WON");
-        estados_game_over.add("LOST");
-        estados_game_over.add("TIE");
+        List<String> game_over_states = new ArrayList<String>();
+        game_over_states.add("WON");
+        game_over_states.add("LOST");
+        game_over_states.add("TIE");
 
-        String estado_actual = gameService.makeStateDTO(gamePlayer);
+        String actual_state = gameService.makeStateDTO(gamePlayer);
 
-        if (estados_game_over.contains(estado_actual)) {
+        if (game_over_states.contains(actual_state)) {
             return gameService.createEntityResponse("error", "Game over", HttpStatus.FORBIDDEN);
         }
 
